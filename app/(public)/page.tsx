@@ -1,9 +1,11 @@
-import React from 'react'
+import React from 'react';
+import HeroSection from '@/components/public/home/HeroSection';
 
-export default function page() {
+export default function HomePage() {
   return (
-    <div className='h-screen w-full bg-red-500 '>
-      
+    <div className="w-full">
+      <HeroSection />
+      {/* Other sections will go here */}
     </div>
-  )
+  );
 }

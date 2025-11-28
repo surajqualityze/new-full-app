@@ -17,8 +17,9 @@ export default function PublicLayout({
   return (
     <div className={novaSquare.variable}>
       <NavbarHead />
-      <div className="max-w-[1600px] w-full mx-auto pt-4">
-        <main className="min-h-screen pt-24">{children}</main>
+      {/* <div className="max-w-[1600px] w-full mx-auto pt-4"> */}
+      <div className="w-full mx-auto pt-4">
+        <main className="min-h-screen">{children}</main>
       </div>
       <Footer />
       {/* Footer will go here */}

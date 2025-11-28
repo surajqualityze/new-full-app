@@ -31,8 +31,6 @@ export async function createDownload(formData: DownloadFormData) {
     };
 
     const result = await db.collection('downloads').insertOne(download);
-
-    // TODO: Trigger email sending (we'll implement this later)
     
     revalidatePath('/admin/downloads');
     return { 
@@ -117,20 +115,13 @@ export async function getDownloadStats(): Promise<DownloadStats> {
       topResources,
       recentDownloads,
     ] = await Promise.all([
-      // Total downloads
       db.collection('downloads').countDocuments(),
-      
-      // This week
       db.collection('downloads').countDocuments({
         downloadedAt: { $gte: weekAgo },
       }),
-      
-      // This month
       db.collection('downloads').countDocuments({
         downloadedAt: { $gte: monthAgo },
       }),
-      
-      // By resource type
       db.collection('downloads').aggregate([
         {
           $group: {
@@ -139,8 +130,6 @@ export async function getDownloadStats(): Promise<DownloadStats> {
           },
         },
       ]).toArray(),
-      
-      // By email status
       db.collection('downloads').aggregate([
         {
           $group: {
@@ -149,8 +138,6 @@ export async function getDownloadStats(): Promise<DownloadStats> {
           },
         },
       ]).toArray(),
-      
-      // Top resources
       db.collection('downloads').aggregate([
         {
           $group: {
@@ -165,8 +152,6 @@ export async function getDownloadStats(): Promise<DownloadStats> {
         { $sort: { count: -1 } },
         { $limit: 5 },
       ]).toArray(),
-      
-      // Recent downloads
       db.collection('downloads')
         .find()
         .sort({ downloadedAt: -1 })
@@ -175,14 +160,33 @@ export async function getDownloadStats(): Promise<DownloadStats> {
     ]);
 
     // Transform aggregation results
-    const byResourceTypeObj: any = {};
+    const byResourceTypeObj: Record<ResourceType, number> = {
+      whitepaper: 0,
+      'case-study': 0,
+      newsletter: 0,
+      brochure: 0,
+      datasheet: 0,
+      guide: 0,
+    };
+    
     byResourceType.forEach((item: any) => {
-      byResourceTypeObj[item._id] = item.count;
+      if (item._id in byResourceTypeObj) {
+        byResourceTypeObj[item._id as ResourceType] = item.count;
+      }
     });
 
-    const byStatusObj: any = {};
+    // Initialize with ALL email status values
+    const byStatusObj: Record<EmailStatus, number> = {
+      delivered: 0,
+      failed: 0,
+      pending: 0,
+      bounced: 0,
+    };
+    
     byStatus.forEach((item: any) => {
-      byStatusObj[item._id] = item.count;
+      if (item._id in byStatusObj) {
+        byStatusObj[item._id as EmailStatus] = item.count;
+      }
     });
 
     return {
@@ -208,8 +212,20 @@ export async function getDownloadStats(): Promise<DownloadStats> {
       total: 0,
       thisWeek: 0,
       thisMonth: 0,
-      byResourceType: {},
-      byStatus: {},
+      byResourceType: {
+        whitepaper: 0,
+        'case-study': 0,
+        newsletter: 0,
+        brochure: 0,
+        datasheet: 0,
+        guide: 0,
+      },
+      byStatus: {
+        delivered: 0,
+        failed: 0,
+        pending: 0,
+        bounced: 0,
+      },
       topResources: [],
       recentDownloads: [],
     };
@@ -304,7 +320,6 @@ export async function exportDownloadsToCSV(filters?: {
 
     const downloads = await getAllDownloads(filters);
     
-    // Create CSV content
     const headers = [
       'Date',
       'Resource Type',
