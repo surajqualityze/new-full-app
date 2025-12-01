@@ -29,7 +29,7 @@ export default async function EmailManagementPage() {
           <CardTitle>Email Configuration</CardTitle>
         </CardHeader>
         <CardContent>
-          <EmailConfigForm initialConfig={config || undefined} />
+          <EmailConfigForm initialConfig={config ?? undefined} />
         </CardContent>
       </Card>
     </div>

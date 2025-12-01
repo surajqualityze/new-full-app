@@ -116,7 +116,7 @@ export async function deleteWhitepaper(id: string) {
 }
 
 // Get single whitepaper
-export async function getWhitepaper(id: string) {
+export async function getWhitepaper(id: string): Promise<(Whitepaper & { _id: string }) | null> {
   try {
     const db = await getDatabase();
     const whitepaper = await db.collection('whitepapers').findOne({ _id: new ObjectId(id) });
@@ -128,7 +128,7 @@ export async function getWhitepaper(id: string) {
     return {
       ...whitepaper,
       _id: whitepaper._id.toString(),
-    };
+    } as Whitepaper & { _id: string };
   } catch (error) {
     console.error('Get whitepaper error:', error);
     return null;

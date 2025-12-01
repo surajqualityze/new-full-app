@@ -7,8 +7,8 @@ import { revalidatePath } from 'next/cache';
 import { createCheckoutSession, verifyPayment, processRefund } from '@/lib/stripe';
 import type { Payment, StripeConfig, CreateCheckoutSessionParams } from '@/types/payment';
 
-// Get Stripe configuration
-export async function getStripeConfig() {
+// Get Stripe configuration - FIXED
+export async function getStripeConfig(): Promise<Omit<StripeConfig, '_id'> | null> {
   try {
     const session = await getSession();
     if (!session) {
@@ -22,20 +22,21 @@ export async function getStripeConfig() {
       return null;
     }
 
-    // Don't send secret keys to client
+    // Exclude _id and mask secret keys
+    const { _id, secretKey, webhookSecret, ...rest } = config;
+    
     return {
-      ...config,
-      _id: config._id.toString(),
+      ...rest,
       secretKey: '••••••••',
-      webhookSecret: config.webhookSecret ? '••••••••' : undefined,
-    };
+      webhookSecret: webhookSecret ? '••••••••' : undefined,
+    } as Omit<StripeConfig, '_id'>;
   } catch (error) {
     console.error('Get Stripe config error:', error);
     return null;
   }
 }
 
-// Save Stripe configuration
+// Save Stripe configuration - FIXED
 export async function saveStripeConfig(config: Partial<StripeConfig>) {
   try {
     const session = await getSession();
@@ -46,10 +47,18 @@ export async function saveStripeConfig(config: Partial<StripeConfig>) {
     const db = await getDatabase();
     const existing = await db.collection('stripe_config').findOne({});
     
-    const configData = {
+    const configData: any = {
       ...config,
       updatedAt: new Date(),
     };
+
+    // Don't update if values are masked
+    if (configData.secretKey === '••••••••') {
+      delete configData.secretKey;
+    }
+    if (configData.webhookSecret === '••••••••') {
+      delete configData.webhookSecret;
+    }
 
     if (existing) {
       await db.collection('stripe_config').updateOne(
@@ -168,6 +177,11 @@ export async function completePayment(sessionId: string) {
 
     const session = verification.session;
 
+    // FIX: Add null check for session
+    if (!session) {
+      return { success: false, error: 'Session data not found' };
+    }
+
     // Update payment record
     const updateData: any = {
       paymentStatus: session.paymentStatus === 'paid' ? 'completed' : 'failed',
@@ -202,7 +216,7 @@ export async function getAllPayments(filters?: {
   trainingId?: string;
   dateFrom?: Date;
   dateTo?: Date;
-}) {
+}): Promise<(Payment & { _id: string })[]> {
   try {
     const session = await getSession();
     if (!session) {
@@ -239,12 +253,13 @@ export async function getAllPayments(filters?: {
     return payments.map(p => ({
       ...p,
       _id: p._id.toString(),
-    }));
+    })) as (Payment & { _id: string })[];
   } catch (error) {
     console.error('Get payments error:', error);
     return [];
   }
 }
+
 
 // Get payment by ID
 export async function getPayment(id: string) {

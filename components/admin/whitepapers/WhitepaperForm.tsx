@@ -124,9 +124,10 @@ export default function WhitepaperForm({ initialData, whitepaperId }: Whitepaper
       if (result.success) {
         if (whitepaperId) {
           router.push(`/admin/whitepapers/${whitepaperId}`);
-        } else if (result.whitepaperId) {
-          router.push(`/admin/whitepapers/${result.whitepaperId}`);
-        }
+        } else if ('whitepaperId' in result && result.whitepaperId) {
+  router.push(`/admin/whitepapers/${result.whitepaperId}`);
+}
+
         router.refresh();
       } else {
         setError(result.error || 'An error occurred');

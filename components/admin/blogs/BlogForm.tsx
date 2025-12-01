@@ -103,7 +103,8 @@ export default function BlogForm({ initialData, blogId }: BlogFormProps) {
       if (result.success) {
         if (blogId) {
           router.push(`/admin/blogs/${blogId}`);
-        } else if (result.blogId) {
+        } else if ('blogId' in result && result.blogId) {
+          // Type guard to check if blogId exists
           router.push(`/admin/blogs/${result.blogId}`);
         }
         router.refresh();

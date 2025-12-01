@@ -8,7 +8,6 @@ import type {
   Download, 
   DownloadFormData, 
   DownloadStats, 
-  EmailConfig,
   ResourceType,
   EmailStatus,
   FollowUpStatus 

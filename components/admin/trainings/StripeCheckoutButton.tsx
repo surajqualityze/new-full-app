@@ -61,7 +61,7 @@ export default function StripeCheckoutButton({
         // Redirect to Stripe Checkout
         window.location.href = result.url;
       } else {
-        setError(result.error || 'Failed to create checkout session');
+        setError('error' in result ? result.error : 'Failed to create checkout session');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');

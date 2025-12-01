@@ -23,16 +23,20 @@ export async function createTraining(formData: TrainingFormData) {
     }
 
     const db = await getDatabase();
-    
-    const slug = formData.slug || generateSlug(formData.title);
-    
+
+    // Generate slug
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
     // Check if slug exists
     const existing = await db.collection('trainings').findOne({ slug });
     if (existing) {
-      return { success: false, error: 'A training with this slug already exists' };
+      return { success: false, error: 'Training with this title already exists' };
     }
 
-    // Get speaker name
+    // Get speaker details
     const speaker = await db.collection('speakers').findOne({ 
       _id: new ObjectId(formData.speakerId) 
     });
@@ -41,10 +45,16 @@ export async function createTraining(formData: TrainingFormData) {
       return { success: false, error: 'Speaker not found' };
     }
 
+    // Convert pricingOptions to string array
+    const pricingOptionStrings = formData.pricingOptions?.map(option => 
+      typeof option === 'string' ? option : option.name
+    ) || [];
+
     const training: Omit<Training, '_id'> = {
       ...formData,
       slug,
       speakerName: speaker.name,
+      pricingOptions: pricingOptionStrings,
       createdAt: new Date(),
       updatedAt: new Date(),
       views: 0,
@@ -53,6 +63,8 @@ export async function createTraining(formData: TrainingFormData) {
     const result = await db.collection('trainings').insertOne(training);
 
     revalidatePath('/admin/trainings');
+    revalidatePath('/trainings');
+    
     return { 
       success: true, 
       trainingId: result.insertedId.toString() 
@@ -72,42 +84,42 @@ export async function updateTraining(id: string, formData: TrainingFormData) {
     }
 
     const db = await getDatabase();
-    const objectId = new ObjectId(id);
-
-    // Check slug uniqueness
-    if (formData.slug) {
-      const existing = await db.collection('trainings').findOne({ 
-        slug: formData.slug,
-        _id: { $ne: objectId }
+    
+    // Get speaker details if speakerId changed
+    let speakerName;
+    if (formData.speakerId) {
+      const speaker = await db.collection('speakers').findOne({ 
+        _id: new ObjectId(formData.speakerId) 
       });
-      if (existing) {
-        return { success: false, error: 'A training with this slug already exists' };
+      if (speaker) {
+        speakerName = speaker.name;
       }
     }
 
-    // Get speaker name
-    const speaker = await db.collection('speakers').findOne({ 
-      _id: new ObjectId(formData.speakerId) 
-    });
-    
-    if (!speaker) {
-      return { success: false, error: 'Speaker not found' };
-    }
+    // Convert pricingOptions to string array
+    const pricingOptionStrings = formData.pricingOptions?.map(option => 
+      typeof option === 'string' ? option : option.name
+    ) || [];
 
-    const updateData: Partial<Training> = {
+    const updateData: any = {
       ...formData,
-      slug: formData.slug || generateSlug(formData.title),
-      speakerName: speaker.name,
+      pricingOptions: pricingOptionStrings,
       updatedAt: new Date(),
     };
 
+    if (speakerName) {
+      updateData.speakerName = speakerName;
+    }
+
     await db.collection('trainings').updateOne(
-      { _id: objectId },
+      { _id: new ObjectId(id) },
       { $set: updateData }
     );
 
     revalidatePath('/admin/trainings');
-    revalidatePath(`/admin/trainings/${id}`);
+    revalidatePath('/trainings');
+    revalidatePath(`/trainings/${id}`);
+    
     return { success: true };
   } catch (error: any) {
     console.error('Update training error:', error);
@@ -134,8 +146,8 @@ export async function deleteTraining(id: string) {
   }
 }
 
-// Get single training
-export async function getTraining(id: string) {
+// Get single training - FIXED with proper typing
+export async function getTraining(id: string): Promise<(Training & { _id: string }) | null> {
   try {
     const db = await getDatabase();
     const training = await db.collection('trainings').findOne({ _id: new ObjectId(id) });
@@ -147,7 +159,7 @@ export async function getTraining(id: string) {
     return {
       ...training,
       _id: training._id.toString(),
-    };
+    } as Training & { _id: string };
   } catch (error) {
     console.error('Get training error:', error);
     return null;

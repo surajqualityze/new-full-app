@@ -50,7 +50,8 @@ export default function PaymentsDataTable({ payments }: PaymentsDataTableProps) 
     if (result.success) {
       router.refresh();
     } else {
-      alert(result.error);
+      // Type guard to check if error exists
+      alert('error' in result ? result.error : 'Failed to refund payment');
     }
     setLoading(null);
   }

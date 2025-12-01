@@ -102,9 +102,10 @@ export default function TrainingForm({ initialData, trainingId }: TrainingFormPr
       if (result.success) {
         if (trainingId) {
           router.push(`/admin/trainings/${trainingId}`);
-        } else if (result.trainingId) {
-          router.push(`/admin/trainings/${result.trainingId}`);
-        }
+     } else if ('trainingId' in result && result.trainingId) {
+  router.push(`/admin/trainings/${result.trainingId}`);
+}
+
         router.refresh();
       } else {
         setError(result.error || 'An error occurred');

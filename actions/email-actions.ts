@@ -7,8 +7,13 @@ import { revalidatePath } from 'next/cache';
 import type { EmailConfig } from '@/types/email';
 
 // Get email configuration
-export async function getEmailConfig() {
+export async function getEmailConfig(): Promise<Omit<EmailConfig, '_id'> | null> {
   try {
+    const session = await getSession();
+    if (!session) {
+      return null;
+    }
+
     const db = await getDatabase();
     const config = await db.collection('email_config').findOne({});
     
@@ -16,20 +21,21 @@ export async function getEmailConfig() {
       return null;
     }
 
-    // Don't send sensitive data to client
-    const safeConfig = {
-      ...config,
-      _id: config._id.toString(),
-      apiKey: config.apiKey ? '••••••••' : undefined,
-      smtpPassword: config.smtpPassword ? '••••••••' : undefined,
-    };
-
-    return safeConfig;
+    // Exclude _id and mask sensitive data
+    const { _id, apiKey, smtpPassword, ...rest } = config;
+    
+    return {
+      ...rest,
+      apiKey: apiKey ? '••••••••' : undefined,
+      smtpPassword: smtpPassword ? '••••••••' : undefined,
+    } as Omit<EmailConfig, '_id'>;
   } catch (error) {
     console.error('Get email config error:', error);
     return null;
   }
 }
+
+
 
 // Save email configuration
 export async function saveEmailConfig(config: Partial<EmailConfig>) {
@@ -40,23 +46,27 @@ export async function saveEmailConfig(config: Partial<EmailConfig>) {
     }
 
     const db = await getDatabase();
-    
-    // Check if config exists
     const existing = await db.collection('email_config').findOne({});
     
-    const configData = {
+    const configData: any = {
       ...config,
       updatedAt: new Date(),
     };
 
+    // Don't update sensitive fields if they're masked
+    if (configData.apiKey === '••••••••') {
+      delete configData.apiKey;
+    }
+    if (configData.smtpPassword === '••••••••') {
+      delete configData.smtpPassword;
+    }
+
     if (existing) {
-      // Update existing
       await db.collection('email_config').updateOne(
         { _id: existing._id },
         { $set: configData }
       );
     } else {
-      // Create new
       await db.collection('email_config').insertOne({
         ...configData,
         createdAt: new Date(),
@@ -70,6 +80,7 @@ export async function saveEmailConfig(config: Partial<EmailConfig>) {
     return { success: false, error: error.message };
   }
 }
+
 
 // Test email configuration
 export async function testEmailConfig(testEmail: string) {

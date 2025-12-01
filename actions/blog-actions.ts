@@ -164,7 +164,8 @@ export async function deleteBlog(id: string) {
   }
 }
 
-export async function getBlog(id: string) {
+// Get single blog
+export async function getBlog(id: string): Promise<(Blog & { _id: string }) | null> {
   try {
     const db = await getDatabase();
     const blog = await db.collection('blogs').findOne({ _id: new ObjectId(id) });
@@ -176,12 +177,13 @@ export async function getBlog(id: string) {
     return {
       ...blog,
       _id: blog._id.toString(),
-    };
+    } as Blog & { _id: string };
   } catch (error) {
     console.error('Get blog error:', error);
     return null;
   }
 }
+
 
 export async function toggleFeatured(id: string) {
   try {

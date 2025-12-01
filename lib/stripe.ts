@@ -25,8 +25,9 @@ export async function getStripeClient(): Promise<Stripe | null> {
     }
 
     const stripe = new Stripe(config.secretKey, {
-      apiVersion: '2024-11-20.acacia',
-    });
+  apiVersion: '2024-11-20.acacia' as any,
+});
+
 
     return stripe;
   } catch (error) {

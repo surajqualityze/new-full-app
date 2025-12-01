@@ -1,19 +1,22 @@
+import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
 
 const oxanium = Oxanium({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
   variable: "--font-oxanium",
-  display: "swap",
 });
 
-export const metadata = {
-  title: "qualityze",
-  description: "Your site description",
+export const metadata: Metadata = {
+  title: "Qualityze",
+  description: "Quality Management System",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body className={`${oxanium.variable} antialiased`}>

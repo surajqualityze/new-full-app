@@ -53,7 +53,7 @@ export default function SpeakerForm({ initialData, speakerId }: SpeakerFormProps
     setForm(prev => ({ ...prev, industries }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -62,15 +62,16 @@ export default function SpeakerForm({ initialData, speakerId }: SpeakerFormProps
       let result;
       
       if (speakerId) {
-        result = await updateSpeaker(speakerId, form);
+        result = await updateSpeaker(speakerId, form); // Changed formData to form
       } else {
-        result = await createSpeaker(form);
+        result = await createSpeaker(form); // Changed formData to form
       }
 
       if (result.success) {
         if (speakerId) {
           router.push(`/admin/speakers/${speakerId}`);
-        } else if (result.speakerId) {
+        } else if ('speakerId' in result && result.speakerId) {
+          // Type guard to check if speakerId exists
           router.push(`/admin/speakers/${result.speakerId}`);
         }
         router.refresh();
@@ -82,7 +83,7 @@ export default function SpeakerForm({ initialData, speakerId }: SpeakerFormProps
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

@@ -18,6 +18,12 @@ export default async function EditTrainingPage({
     notFound();
   }
 
+  // Convert pricingOptions from string[] to PricingOption[] with price
+  const pricingOptions = training.pricingOptions?.map(option => ({
+    name: option,
+    price: 0, // Default price, or extract from option string if needed
+  })) || [];
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       <div className="flex items-center gap-4">
@@ -54,7 +60,7 @@ export default async function EditTrainingPage({
               tags: training.tags,
               speakerId: training.speakerId,
               coverImage: training.coverImage,
-              pricingOptions: training.pricingOptions,
+              pricingOptions: pricingOptions, // Use converted array with price
               regularPrice: training.regularPrice,
               discountPrice: training.discountPrice,
               whoShouldAttend: training.whoShouldAttend,

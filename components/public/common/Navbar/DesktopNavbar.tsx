@@ -25,19 +25,14 @@ export function DesktopNavbar({ active, setActive }: DesktopNavbarProps) {
             className="object-contain cursor-pointer"
             priority
           /> */}
-          <div className="text-2xl font-extrabold">
-            Qualityze
-          </div>
+          <div className="text-2xl font-extrabold">Qualityze</div>
         </Link>
 
         <div className="flex items-center space-x-6">
           {/* Training Link */}
-          <MenuItem
-            setActive={setActive}
-            active={active}
-            item="Training"
-            href="/training"
-          />
+          <Link href="/training">
+            <MenuItem setActive={setActive} active={active} item="Training" />
+          </Link>
 
           {/* Dropdowns */}
           <NavbarDropdowns setActive={setActive} active={active} />

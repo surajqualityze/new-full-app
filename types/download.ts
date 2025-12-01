@@ -9,7 +9,6 @@ export type ResourceType =
   | 'guide';
 
 export type EmailStatus = 'delivered' | 'failed' | 'pending' | 'bounced';
-export type EmailProvider = 'sendgrid' | 'mailgun' | 'aws-ses' | 'resend';
 export type FollowUpStatus = 'pending' | 'contacted' | 'converted' | 'not-interested';
 
 export interface Download {
@@ -41,7 +40,7 @@ export interface Download {
   emailSent: boolean;
   emailSentAt?: Date;
   emailStatus: EmailStatus;
-  emailProvider?: EmailProvider;
+  emailProvider?: string; // Import from types/email.ts if needed
   emailId?: string; // Tracking ID from email service
   emailError?: string;
   
@@ -99,24 +98,4 @@ export interface DownloadStats {
   recentDownloads: Download[];
 }
 
-export interface EmailConfig {
-  _id?: ObjectId;
-  provider: EmailProvider;
-  apiKey: string;
-  fromEmail: string;
-  fromName: string;
-  replyTo: string;
-  enableAutoSend: boolean;
-  enableRetry: boolean;
-  maxRetries: number;
-  retryDelay: number; // seconds
-  templates: {
-    [key in ResourceType]?: {
-      subject: string;
-      htmlBody: string;
-      textBody: string;
-    };
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
+// REMOVED: EmailConfig interface - use the one from types/email.ts instead

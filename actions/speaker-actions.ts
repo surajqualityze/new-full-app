@@ -6,8 +6,6 @@ import { ObjectId } from 'mongodb';
 import { revalidatePath } from 'next/cache';
 import type { Speaker } from '@/types/speaker';
 
-// Get all speakers (already exists, but let's make sure)
-// Get all speakers
 // Get all speakers
 export async function getAllSpeakers() {
   try {
@@ -21,22 +19,19 @@ export async function getAllSpeakers() {
     return speakers.map(s => ({
       _id: s._id.toString(),
       name: s.name,
-      photoUrl: s.photoUrl,  // Make sure this is included
+      photoUrl: s.photoUrl,
       expertise: s.expertise || '',
       years: s.years || 0,
       industries: s.industries || [],
       bio: s.bio || '',
     }));
   } catch (error) {
-    // console.error('Get all speakers error:', error);
     return [];
   }
 }
 
-
-
-// Get single speaker
-export async function getSpeaker(id: string) {
+// Get single speaker - FIXED with proper typing
+export async function getSpeaker(id: string): Promise<(Speaker & { _id: string; trainings: any[] }) | null> {
   try {
     const db = await getDatabase();
     const speaker = await db.collection('speakers').findOne({ _id: new ObjectId(id) });
@@ -45,13 +40,14 @@ export async function getSpeaker(id: string) {
       return null;
     }
 
-    // Get trainings by this speaker
+    // Get associated trainings
     const trainings = await db
       .collection('trainings')
       .find({ speakerId: id })
-      .sort({ createdAt: -1 })
+      .project({ _id: 1, title: 1, type: 1, status: 1 })
       .toArray();
 
+    // Return all speaker properties with trainings
     return {
       ...speaker,
       _id: speaker._id.toString(),
@@ -61,7 +57,7 @@ export async function getSpeaker(id: string) {
         type: t.type,
         status: t.status,
       })),
-    };
+    } as Speaker & { _id: string; trainings: any[] };
   } catch (error) {
     console.error('Get speaker error:', error);
     return null;
