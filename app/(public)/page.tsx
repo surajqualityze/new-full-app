@@ -3,6 +3,8 @@ import HeroSection from '@/components/public/home/HeroSection';
 import ScrollTextSection from '@/components/public/home/ScrollTextSection';
 import HomeCarousel from '@/components/public/home/HomeCarousel';
 import { Suspense } from 'react';
+import SpeakersSection from '@/components/public/home/SpeakersSection';
+import { MaskedDivSwiperCarousel } from '@/components/public/home/MaskedDivSwiperCarousel';
 
 export default function HomePage() {
   return (
@@ -15,6 +17,8 @@ export default function HomePage() {
         <HeroSection />
         <ScrollTextSection />
         <HomeCarousel />
+        <SpeakersSection />
+        <MaskedDivSwiperCarousel />
       </Suspense>
     </div>
   );
