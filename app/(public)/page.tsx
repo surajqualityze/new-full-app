@@ -5,6 +5,9 @@ import HomeCarousel from '@/components/public/home/HomeCarousel';
 import { Suspense } from 'react';
 import SpeakersSection from '@/components/public/home/SpeakersSection';
 import { MaskedDivSwiperCarousel } from '@/components/public/home/MaskedDivSwiperCarousel';
+import { LogoCarouselDemo } from '@/components/public/home/LogoCarouselDemo';
+import { MarqueeDemo } from '@/components/public/home/Marquee';
+import RequestDemoMain from '@/components/public/home/RequestDemoMain';
 
 export default function HomePage() {
   return (
@@ -19,6 +22,9 @@ export default function HomePage() {
         <HomeCarousel />
         <SpeakersSection />
         <MaskedDivSwiperCarousel />
+        <LogoCarouselDemo />
+        <MarqueeDemo />
+        <RequestDemoMain />
       </Suspense>
     </div>
   );
