@@ -2,15 +2,26 @@
 
 import { useState, type FormEvent } from "react";
 import { motion, easeOut } from "motion/react";
+import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
-import AceWorldMapDemo from "../common/AceWorld/AceWorldMapDemo";
+import { TextGifHeadingOne, TextGifHeadingTwo } from "../textGif/TextGifDemo";
 import { GradientButton } from "../common/my-button/GradientButton";
-import { TextGifHeadingOne } from "../textGif/TextGifDemo";
+// import { GradientButton } from "@/components/common/my-button/GradientButton";
+// import { TextGifHeadingOne } from "@/components/textGif/TextGifDemo";
 
+// Lazy load AceWorldMapDemo (client-side only)
+const AceWorldMapDemo = dynamic(
+  () => import("../common/AceWorld/AceWorldMapDemo"),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="text-center py-20 text-gray-500">Loading map...</p>
+    ),
+  }
+);
 
-// Form data interface
 interface ContactFormData {
   fullName: string;
   company: string;
@@ -45,13 +56,8 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Add your form submission logic here
       console.log("Form submitted:", formData);
-      
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Reset form after successful submission
       setFormData(initialFormState);
       alert("Message sent successfully!");
     } catch (error) {
@@ -64,7 +70,7 @@ export default function Contact() {
 
   return (
     <section className="font-['Oxanium']">
-      {/* Banner Section with Video */}
+      {/* Banner Section with Video and Poster */}
       <motion.div
         className="relative w-full h-[320px] md:h-[420px] overflow-hidden flex items-center justify-center"
         initial={{ opacity: 0 }}
@@ -75,6 +81,7 @@ export default function Contact() {
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src="/images/contact/contact_bnr.webm"
+          poster="/images/contact/contact_bnr_poster.jpg"
           autoPlay
           loop
           muted
@@ -90,7 +97,9 @@ export default function Contact() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2, ease: easeOut }}
           >
+            <TextGifHeadingTwo >
             Get In Touch
+            </TextGifHeadingTwo>
           </motion.h1>
         </div>
       </motion.div>
