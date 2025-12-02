@@ -17,15 +17,14 @@ export function DesktopNavbar({ active, setActive }: DesktopNavbarProps) {
       <Menu setActive={setActive}>
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          {/* <Image
+          <Image
             src="/images/logo/Saas_Logo_blk.png"
             alt="Logo"
             width={140}
             height={40}
             className="object-contain cursor-pointer"
             priority
-          /> */}
-          <div className="text-2xl font-extrabold">Qualityze</div>
+          />
         </Link>
 
         <div className="flex items-center space-x-6">
