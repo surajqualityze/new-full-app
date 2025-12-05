@@ -1,262 +1,137 @@
 "use client";
 
-import React, { useEffect, useRef, useLayoutEffect, type FC, type ReactNode } from "react";
-// import { gsap } from "gsap";
-// import ScrollTrigger from "gsap/ScrollTrigger";
-// import FadeOverlay from "@/components/ui/FadeOverlay";
+import React, { FC, ReactNode, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-// import { LeadFormDialog } from "../common/LeadFormDialog";
 import type { ServiceLayoutProps } from "@/types/service";
+import { motion, useScroll, useTransform } from "framer-motion";
 
-// gsap.registerPlugin(ScrollTrigger);
+/* ------------------------ Bullet Component ------------------------ */
+const Bullet: FC<{ children: ReactNode }> = ({ children }) => (
+  <li className="flex items-start gap-2">
+    <span className="text-neutral-400 select-none">-</span>
+    <span>{children}</span>
+  </li>
+);
 
-// Bullet component with proper typing
-interface BulletProps {
-  children: ReactNode;
-}
-
-const Bullet: FC<BulletProps> = ({ children }) => {
-  return (
-    <li className="flex items-start gap-2">
-      <span className="text-neutral-400 select-none">-</span>
-      <span>{children}</span>
-    </li>
-  );
-};
-
+/* ------------------------ MAIN LAYOUT ------------------------ */
 const ServiceLayout: FC<ServiceLayoutProps> = ({
   heroData,
   servicesData,
   industriesData,
   className = "",
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Use useLayoutEffect instead of useEffect for better sync
-  useLayoutEffect(() => {
-    // Clear any existing transforms on initial load
-    gsap.set(".image-container", { clearProps: "all" });
-
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>(".image-container").forEach((img) => {
-        // Set initial state explicitly
-        gsap.set(img, { y: 0 });
-
-        gsap.to(img, {
-          y: "-100vh",
-          ease: "none",
-          scrollTrigger: {
-            trigger: img.closest("section"),
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-            invalidateOnRefresh: true,
-            anticipatePin: 1,
-            refreshPriority: -1,
-            onRefresh: () => {
-              gsap.set(img, { y: 0 });
-            },
-          },
-        });
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  // Handle page refresh and browser restore behavior
-  useEffect(() => {
-    // Force scroll to top on page load (prevents browser restore scroll position)
-    const handleBeforeUnload = () => {
-      window.scrollTo(0, 0);
-    };
-
-    const handleLoad = () => {
-      // Clear all transforms and refresh
-      gsap.set(".image-container", { clearProps: "all" });
-      ScrollTrigger.refresh(true);
-
-      // Small delay to ensure proper positioning
-      setTimeout(() => {
-        ScrollTrigger.refresh(true);
-      }, 100);
-    };
-
-    // Prevent browser from restoring scroll position
-    if ("scrollRestoration" in history) {
-      history.scrollRestoration = "manual";
-    }
-
-    // Force page to start at top
-    window.scrollTo(0, 0);
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("load", handleLoad);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("load", handleLoad);
-      if ("scrollRestoration" in history) {
-        history.scrollRestoration = "auto";
-      }
-    };
-  }, []);
-
   return (
     <>
-      <div
-        ref={containerRef}
-        className={`relative gradient-container ${className}`}
+      {/* ------------------------ HERO SECTION ------------------------ */}
+      {/* ------------------------ HERO SECTION ------------------------ */}
+      <section
+        className={`relative h-[70vh] w-full flex items-end px-8 lg:px-16 ${className}`}
       >
-        {/* Hero Section */}
-        <section className="h-[70vh] w-full flex items-end justify-between px-8 lg:px-16">
-          <div className="flex-1 pr-8 z-20">
-            <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-6 w-3/5">
-              {heroData.title}
-            </h1>
-            <p className="text-lg lg:text-xl text-gray-600 mb-8 leading-relaxed">
-              {heroData.description}
-            </p>
-          </div>
-        </section>
+        <div className="flex-1 pr-8 z-20">
+          <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-6 w-3/5">
+            {heroData.title}
+          </h1>
 
-        {/* Services Sections */}
-        {servicesData.map((service, index) => {
-          const isEven = index % 2 === 0;
+          <p className="text-lg lg:text-xl text-gray-700 leading-relaxed">
+            {heroData.description}
+          </p>
+        </div>
+      </section>
 
-          return (
-            <section
-              key={service.slug}
-              className="h-screen w-full flex items-center justify-between px-8 lg:px-16 sticky top-0 z-10"
-            >
-              {isEven ? (
-                <>
-                  {/* Text Content - Left Side */}
-                  <div className="flex-1 pr-8 z-20 bg-white">
-                    <h2 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-6">
-                      {service.title}
-                    </h2>
-                    <p className="text-lg lg:text-xl text-gray-600 mb-8 leading-relaxed">
-                      {service.description}
-                    </p>
-                    {service.bullets && service.bullets.length > 0 && (
-                      <ul className="space-y-2 text-sm">
-                        {service.bullets.map((bullet, bulletIndex) => (
-                          <Bullet key={`${service.slug}-bullet-${bulletIndex}`}>
-                            {bullet}
-                          </Bullet>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="flex flex-col gap-3 mt-4">
-                      <Link
-                        href={`/services/${heroData.slug}/${service.slug}`}
-                        className="text-blue-400 underline-offset-2 hover:underline"
-                      >
-                        Read More
-                      </Link>
-                      {/* <LeadFormDialog 
-                        buttonLabel="Get Started" 
-                        servicesData={servicesData} 
-                      /> */}
-                    </div>
-                  </div>
+      {/* ------------------------ SERVICE SECTIONS ------------------------ */}
+      {servicesData.map((service, index) => {
+  const isEven = index % 2 === 0;
 
-                  {/* Image - Right Side */}
-                  <FadeOverlay>
-                    <div className="image-container flex items-center justify-center h-full">
-                      <Image
-                        src={service.image.src}
-                        alt={service.image.alt}
-                        width={1200}
-                        height={800}
-                        priority={index === 0}
-                        className="max-h-[80vh] max-w-full object-contain rounded-lg shadow-lg mx-auto"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
-                    </div>
-                  </FadeOverlay>
-                </>
-              ) : (
-                <>
-                  {/* Image - Left Side */}
-                  <FadeOverlay>
-                    <div className="image-container flex items-center justify-center h-full">
-                      <Image
-                        src={service.image.src}
-                        alt={service.image.alt}
-                        width={1200}
-                        height={800}
-                        priority={index === 0}
-                        className="max-h-[80vh] max-w-full object-contain rounded-lg shadow-lg mx-auto"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
-                    </div>
-                  </FadeOverlay>
+  // ref for scroll animation
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-                  {/* Text Content - Right Side */}
-                  <div className="flex-1 pl-8 z-20">
-                    <h2 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-6">
-                      {service.title}
-                    </h2>
-                    <p className="text-lg lg:text-xl text-gray-600 mb-8 leading-relaxed">
-                      {service.description}
-                    </p>
-                    {service.bullets && service.bullets.length > 0 && (
-                      <ul className="space-y-2 text-sm">
-                        {service.bullets.map((bullet, bulletIndex) => (
-                          <Bullet key={`${service.slug}-bullet-${bulletIndex}`}>
-                            {bullet}
-                          </Bullet>
-                        ))}
-                      </ul>
-                    )}
-                    <div className="flex flex-col gap-3 mt-4">
-                      <Link
-                        href={`/services/${heroData.slug}/${service.slug}`}
-                        className="text-blue-400 underline-offset-2 hover:underline"
-                      >
-                        Read More
-                      </Link>
-                      {/* <LeadFormDialog 
-                        buttonLabel="Get Started" 
-                        servicesData={servicesData} 
-                      /> */}
-                    </div>
-                  </div>
-                </>
-              )}
-            </section>
-          );
-        })}
-      </div>
+  // detect scroll progress for this section
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"], // triggers when next section approaches
+  });
 
-      {/* Industries Section */}
-      {industriesData && industriesData.length > 0 && (
-        <section
-          className="relative bg-neutral-950 text-neutral-100"
-          style={{ zIndex: 200 }}
+  // image moves upward from 0px → -150px
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0px", "-150px"]);
+
+  return (
+    <section
+      key={service.slug}
+      ref={sectionRef}
+      className="h-screen w-full sticky top-0 bg-white flex items-center px-8 lg:px-16"
+    >
+      <div
+        className={`flex w-full items-center ${
+          isEven ? "flex-row" : "flex-row-reverse"
+        }`}
+      >
+        {/* TEXT BLOCK (unchanged) */}
+        <div
+          className={`flex-1 ${
+            isEven ? "pr-10" : "pl-10"
+          } max-w-[600px] z-20`}
         >
-          <div className="mx-auto max-w-[1600px] py-12 sm:py-16 px-4 sm:px-6 md:px-8 lg:px-12">
-            <h3 className="text-xl font-semibold tracking-tight">Industries</h3>
-            <p className="mt-2 text-sm text-neutral-400 max-w-[60ch]">
-              We partner with clients across multiple sectors to ship meaningful
-              products and results.
-            </p>
-            <div className="mt-8 divide-y divide-neutral-800 border-y border-neutral-800">
-              {industriesData.map((row, rowIndex) => (
-                <div
-                  key={`${row.name}-${rowIndex}`}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-3 py-4"
-                >
-                  <div className="font-medium">{row.name}</div>
-                  <div className="md:col-span-2 text-sm text-neutral-400">
-                    {row.detail}
-                  </div>
-                </div>
+          <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-6">
+            {service.title}
+          </h2>
+
+          <p className="text-lg lg:text-xl text-gray-700 mb-8 leading-relaxed">
+            {service.description}
+          </p>
+
+          {service.bullets?.length > 0 && (
+            <ul className="space-y-2 text-sm">
+              {service.bullets.map((b, i) => (
+                <Bullet key={i}>{b}</Bullet>
               ))}
-            </div>
+            </ul>
+          )}
+
+          <Link
+            href={`/services/${heroData.slug}/${service.slug}`}
+            className="text-blue-500 underline-offset-2 hover:underline inline-block mt-6"
+          >
+            Read More
+          </Link>
+        </div>
+
+        {/* IMAGE BLOCK WITH PARALLAX SLIDE-UP */}
+        <motion.div
+          style={{ y: imageY }}
+          className="flex-1 flex items-center justify-center"
+        >
+          <Image
+            src={service.image.src}
+            alt={service.image.alt}
+            width={1200}
+            height={800}
+            className="max-h-[80vh] object-contain rounded-xl shadow-lg"
+          />
+        </motion.div>
+      </div>
+    </section>
+  );
+})}
+
+      {/* ------------------------ INDUSTRIES SECTION ------------------------ */}
+      {industriesData?.length > 0 && (
+        <section className="h-screen sticky top-0 bg-neutral-950 text-neutral-100 py-16 px-8 lg:px-16 flex flex-col justify-center">
+          <h3 className="text-xl font-semibold tracking-tight">Industries</h3>
+          <p className="mt-2 text-sm text-neutral-400 max-w-[60ch]">
+            We partner with clients across multiple sectors to build meaningful
+            solutions.
+          </p>
+
+          <div className="mt-8 divide-y divide-neutral-800 border-y border-neutral-800">
+            {industriesData.map((row, i) => (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-3 gap-3 py-4">
+                <div className="font-medium">{row.name}</div>
+                <div className="md:col-span-2 text-sm text-neutral-400">
+                  {row.detail}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}
