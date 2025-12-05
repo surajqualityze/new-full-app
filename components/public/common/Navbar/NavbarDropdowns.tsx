@@ -75,7 +75,7 @@ export function NavbarDropdowns({ setActive, active }: NavbarDropdownsProps) {
       {/* Services Dropdown */}
       <MenuItem setActive={setActive} active={active} item="Services">
         <div className="flex flex-col space-y-4 text-sm">
-          {loading ? (
+          {/* {loading ? (
             <span className="text-xs text-muted-foreground">Loading...</span>
           ) : services.length === 0 ? (
             <span className="text-xs text-muted-foreground">No services available</span>
@@ -88,7 +88,7 @@ export function NavbarDropdowns({ setActive, active }: NavbarDropdownsProps) {
                 <AnimatedLink text={service.name} />
               </HoveredLink>
             ))
-          )}
+          )} */}
         </div>
       </MenuItem>
 
